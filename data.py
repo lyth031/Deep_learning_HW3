@@ -12,12 +12,12 @@ class Corpus(object):
         ## max_sql means the maximum sequence length
         self.max_sql = max_sql
         self.batch_size = batch_size
-        self.train_batch_num = self.train.size(0) // self.batch_size["train"] 
-        self.valid_batch_num = self.valid.size(0) // self.batch_size["valid"]
-        self.train = self.train.narrow(0, 0, self.batch_size["train"] * self.train_batch_num)
-        self.valid = self.valid.narrow(0, 0, self.batch_size["valid"] * self.valid_batch_num)
-        self.train = self.train.view(self.batch_size["train"], -1).t().contiguous()
-        self.valid = self.valid.view(self.batch_size["valid"], -1).t().contiguous()
+        self.train_batch_num = self.train.size(0) // self.batch_size 
+        self.valid_batch_num = self.valid.size(0) // self.batch_size
+        self.train = self.train.narrow(0, 0, self.batch_size * self.train_batch_num)
+        self.valid = self.valid.narrow(0, 0, self.batch_size * self.valid_batch_num)
+        self.train = self.train.view(self.batch_size, -1).t().contiguous()
+        self.valid = self.valid.view(self.batch_size, -1).t().contiguous()
 
     def set_train(self):
         self.dset_flag = "train"

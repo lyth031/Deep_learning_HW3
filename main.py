@@ -15,7 +15,7 @@ from torch.nn.utils import clip_grad_norm
 parser = argparse.ArgumentParser(description='PyTorch ptb Language Model')
 parser.add_argument('--epochs', type=int, default=40,
                     help='upper epoch limit')
-parser.add_argument('--batch_size', type=int, default=20, metavar='N',
+parser.add_argument('--batch_size', type=int, default=20,
                     help='batch size')
 parser.add_argument('--max_sql', type=int, default=35,
                     help='sequence length')
