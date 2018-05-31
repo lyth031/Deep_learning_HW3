@@ -42,13 +42,15 @@ torch.manual_seed(args.seed)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # load data
-data_loader = data.Corpus("./data/ptb", args.batch_size, args.max_sql)
-data_loader.set_train()
-nvocab = len(data_loader.word_id)    
+data_loader = data.Corpus()
+ids = data_loader.get_data("./data/ptb/train.txt", args.batch_size)
+nvocab = len(data_loader.dictionary)
+num_batches = ids.size(1) // args.max_sql
+
 # WRITE CODE HERE witnin two '#' bar
 ########################################
 # Build LMModel model (bulid your language model here)
-model = model.LMModel(nvocab, args.nembed, args.nhidden, args.nlayers)
+model = model.LMModel(nvocab, args.nembed, args.nhidden, args.nlayers).to(device)
 ########################################
 
 criterion = nn.CrossEntropyLoss()
@@ -71,12 +73,10 @@ def train():
     # Set initial hidden and cell states
     states = (torch.zeros(args.nlayers, args.batch_size, args.nhidden),
               torch.zeros(args.nlayers, args.batch_size, args.nhidden))
-    data, target, end_flag = data_loader.get_batch()
-    i = 0
-    while not end_flag:
-    # Get mini-batch inputs and targets
-        inputs = data
-        targets = target
+    for i in range(0, ids.size(1) - args.max_sql, args.max_sql):
+        # Get mini-batch inputs and targets
+        inputs = ids[:, i:i+args.max_sql].to(device)
+        targets = ids[:, (i+1):(i+1)+args.max_sql].to(device)
         
         # Forward pass
         states = detach(states)
@@ -92,9 +92,8 @@ def train():
         step = (i+1) // args.max_sql
         if step % 100 == 0:
             print('Epoch [{}/{}], Step[{}/{}], Loss: {:.4f}, Perplexity: {:5.2f}'
-                  .format(epoch+1, args.epochs, step, data_loader.train_batch_num, loss.item(), np.exp(loss.item())))
-        data, target, end_flag = data_loader.get_batch()
-        i = i + 1
+                  .format(epoch+1, args.epochs, step, num_batches, loss.item(), np.exp(loss.item())))
+
 ########################################
 
 # Truncated backpropagation
@@ -106,3 +105,4 @@ for epoch in range(1, args.epochs+1):
     train()
     # evaluate()
 
+torch.save(model.state_dict(), 'model.ckpt')
