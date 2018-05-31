@@ -68,7 +68,7 @@ device = torch.device("cuda" if args.cuda else "cpu")
 
 corpus_train = data.Corpus(args.train)
 corpus_valid = data.Corpus(args.valid)
-if not is_training:
+if not args.is_training:
     corpus_test = data.Corpus(args.test)
 
 # Starting from sequential data, batchify arranges the dataset into columns.
@@ -96,7 +96,7 @@ eval_batch_size = 10
 
 train_data = batchify(corpus_train.data, args.batch_size)
 val_data = batchify(corpus_valid.data, eval_batch_size)
-if not is_training:
+if not args.is_training:
     test_data = batchify(corpus_test.data, eval_batch_size)
 
 ###############################################################################
