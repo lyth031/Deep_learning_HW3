@@ -31,9 +31,9 @@ class LMModel(nn.Module):
         # WRITE CODE HERE witnin two '#' bar
         ########################################
         # With embeddings, you can get your output here. Output has the dimension of sequence_length * batch_size * number of classes
-        output, hidden = self.rnn(embeddings)
+        output, (hidden, c) = self.rnn(embeddings, hidden)
         ########################################
         output = self.drop(output)
         decoded = self.decoder(output.view(output.size(0)*output.size(1), output.size(2)))
-        return decoded.view(output.size(0), output.size(1), decoded.size(1)), hidden
+        return decoded.view(output.size(0), output.size(1), decoded.size(1)), (hidden, c)
 
