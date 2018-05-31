@@ -39,7 +39,7 @@ args = parser.parse_args()
 torch.manual_seed(args.seed)
 
 # Use gpu or cpu to train
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # load data
 data_loader = data.Corpus()
@@ -50,7 +50,7 @@ num_batches = ids.size(1) // args.max_sql
 # WRITE CODE HERE witnin two '#' bar
 ########################################
 # Build LMModel model (bulid your language model here)
-model = model.LMModel(nvocab, args.nembed, args.nhidden, args.nlayers).to(device)
+model = model.LMModel(nvocab, args.nembed, args.nhidden, args.nlayers)
 ########################################
 
 criterion = nn.CrossEntropyLoss()
@@ -75,8 +75,8 @@ def train():
               torch.zeros(args.nlayers, args.batch_size, args.nhidden))
     for i in range(0, ids.size(1) - args.max_sql, args.max_sql):
         # Get mini-batch inputs and targets
-        inputs = ids[:, i:i+args.max_sql].to(device)
-        targets = ids[:, (i+1):(i+1)+args.max_sql].to(device)
+        inputs = ids[:, i:i+args.max_sql]
+        targets = ids[:, (i+1):(i+1)+args.max_sql]
         
         # Forward pass
         states = detach(states)
