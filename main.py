@@ -46,7 +46,7 @@ data_loader = data.Corpus()
 ids = data_loader.get_data("./data/ptb/train.txt", args.batch_size)
 nvocab = len(data_loader.dictionary)
 num_batches = ids.size(1) // args.max_sql
-
+val_loader = data.Corpus()
 # WRITE CODE HERE witnin two '#' bar
 ########################################
 # Build LMModel model (bulid your language model here)
@@ -62,7 +62,26 @@ optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
 # Calculate the average cross-entropy loss between the prediction and the ground truth word.
 # And then exp(average cross-entropy loss) is perplexity.
 def evaluate(data_source):
-    pass
+    ids = val_loader.get_data(data_source, args.batch_size)
+    tot_loss = 0
+    step = 0
+    states = (torch.zeros(args.nlayers, args.batch_size, args.nhidden).to(device),
+              torch.zeros(args.nlayers, args.batch_size, args.nhidden).to(device))
+    for i in range(0, ids.size(1) - args.max_sql, args.max_sql):
+        # Get mini-batch inputs and targets
+        inputs = ids[:, i:i+args.max_sql].to(device)
+        targets = ids[:, (i+1):(i+1)+args.max_sql].to(device)
+        
+        # Forward pass
+        states = detach(states)
+        outputs, states = model(inputs, states)
+        loss = criterion(outputs, targets.reshape(-1))
+        tot_loss += loss.item()
+        step += 1
+    
+    tot_loss = tot_loss / step
+    print('Epoch [{}/{}]], Loss: {:.4f}, Perplexity: {:5.2f}'
+          .format(epoch+1, args.epochs, tot_loss, np.exp(tot_loss)))
 ########################################
 
 
@@ -103,6 +122,6 @@ def detach(states):
 # Loop over epochs.
 for epoch in range(0, args.epochs):
     train()
-    # evaluate()
+    evaluate("./data/ptb/valid.txt")
 
 torch.save(model.state_dict(), 'model.ckpt')
