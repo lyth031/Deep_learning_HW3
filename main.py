@@ -11,7 +11,7 @@ import data
 import model
 
 parser = argparse.ArgumentParser(description='PyTorch RNN Language Model')
-parser.add_argument('--train', type=str, default='./data/ptb',
+parser.add_argument('--data', type=str, default='./data/ptb',
                     help='location of the train data corpus')
 parser.add_argument('--is_training', type=bool, default=True,
                     help='train or test')                   
