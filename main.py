@@ -76,9 +76,8 @@ def evaluate(data_source):
         states = detach(states)
         outputs, states = model(inputs, states)
         loss = criterion(outputs, targets.reshape(-1))
-        tot_loss += loss.item()
-        step += 1
-    
+        tot_loss += len(inputs)*loss.item()
+        step += len(inputs)
     tot_loss = tot_loss / step
     print('Epoch [{}/{}]], Loss: {:.4f}, Perplexity: {:5.2f}'
           .format(epoch+1, args.epochs, tot_loss, np.exp(tot_loss)))
