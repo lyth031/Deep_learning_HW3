@@ -8,7 +8,7 @@ class LMModel(nn.Module):
     # The output layer has input as the hidden feature and output the probability of each word in the vocabulary.
     def __init__(self, nvocab, nembed, nhidden, nlayers):       
         super(LMModel, self).__init__()
-        self.drop = nn.Dropout(0.5)
+        # self.drop = nn.Dropout(0.5)
         self.encoder = nn.Embedding(nvocab, nembed)
         # WRITE CODE HERE witnin two '#' bar
         ########################################
@@ -27,13 +27,13 @@ class LMModel(nn.Module):
         self.decoder.weight.data.uniform_(-init_uniform, init_uniform)
 
     def forward(self, input, hidden):
-        embeddings = self.drop(self.encoder(input))
+        embeddings = self.encoder(input)
         # WRITE CODE HERE witnin two '#' bar
         ########################################
         # With embeddings, you can get your output here. Output has the dimension of sequence_length * batch_size * number of classes
         output, (hidden, c) = self.rnn(embeddings, hidden)
         ########################################
-        output = self.drop(output)
-        decoded = self.decoder(output.view(output.size(0)*output.size(1), output.size(2)))
-        return decoded.view(output.size(0), output.size(1), decoded.size(1)), (hidden, c)
+        output = output.reshape(output.size(0)*output.size(1), output.size(2))
+        decoded = self.decoder(output)
+        return decoded, (hidden, c)
 
