@@ -84,6 +84,7 @@ ntokens = len(corpus.dictionary)
 model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied)
 
 # Load checkpoint
+"""
 if args.checkpoint != '':
     if args.cuda:
         model = torch.load(args.checkpoint)
@@ -97,7 +98,7 @@ else:
     model.cpu()
 print (model)
 quit()
-
+"""
 criterion = nn.CrossEntropyLoss()
 if args.cuda:
     criterion.cuda()
