@@ -65,10 +65,10 @@ device = torch.device("cuda" if args.cuda else "cpu")
 # Load data
 ###############################################################################
 
-if args.is_training:
-    corpus_train = data.Corpus(args.train)
-    corpus_valid = data.Corpus(args.valid)
-else:
+
+corpus_train = data.Corpus(args.train)
+corpus_valid = data.Corpus(args.valid)
+if not is_training:
     corpus_test = data.Corpus(args.test)
 
 # Starting from sequential data, batchify arranges the dataset into columns.
@@ -93,10 +93,10 @@ def batchify(data, bsz):
     return data.to(device)
 
 eval_batch_size = 10
-if args.is_training:
-    train_data = batchify(corpus_train.data, args.batch_size)
-    val_data = batchify(corpus_valid.data, eval_batch_size)
-else:
+
+train_data = batchify(corpus_train.data, args.batch_size)
+val_data = batchify(corpus_valid.data, eval_batch_size)
+if not is_training:
     test_data = batchify(corpus_test.data, eval_batch_size)
 
 ###############################################################################
@@ -137,14 +137,11 @@ def get_batch(source, i):
     return data, target
 
 
-def evaluate(data_source, is_training):
+def evaluate(data_source):
     # Turn on evaluation mode which disables dropout.
     model.eval()
     total_loss = 0.
-    if is_training:
-        ntokens = len(corpus_valid.dictionary)
-    else:
-        ntokens = len(corpus_test.dictionary)
+    ntokens = len(corpus_train.dictionary)
     hidden = model.init_hidden(eval_batch_size)
     with torch.no_grad():
         for i in range(0, data_source.size(0) - 1, args.bptt):
@@ -210,7 +207,7 @@ if args.is_training:
         for epoch in range(1, args.epochs+1):
             epoch_start_time = time.time()
             train()
-            val_loss = evaluate(val_data, args.is_training)
+            val_loss = evaluate(val_data)
             print('-' * 89)
             print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
                     'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
@@ -238,7 +235,7 @@ else:
         model.rnn.flatten_parameters()
 
     # Run on test data.
-    test_loss = evaluate(test_data, args.is_training)
+    test_loss = evaluate(test_data)
     print('=' * 89)
     print('| Test loss {:5.2f} | test ppl {:8.2f}'.format(
         test_loss, math.exp(test_loss)))
