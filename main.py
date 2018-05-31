@@ -43,7 +43,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # load data
 data_loader = data.Corpus("./data/ptb", args.batch_size, args.max_sql)
-
+data_loader.set_train()
 nvocab = len(data_loader.word_id)    
 # WRITE CODE HERE witnin two '#' bar
 ########################################
