@@ -21,8 +21,6 @@ parser.add_argument('--max_sql', type=int, default=35,
                     help='sequence length')
 parser.add_argument('--seed', type=int, default=1234,
                     help='set random seed')
-parser.add_argument('--cuda', action='store_true', help='use CUDA device')
-parser.add_argument('--gpu_id', type=int, help='GPU device id used')
 # Hyper-parameters
 
 parser.add_argument('--nembed', type=int, default=128,
@@ -41,13 +39,7 @@ args = parser.parse_args()
 torch.manual_seed(args.seed)
 
 # Use gpu or cpu to train
-use_gpu = True
-
-if use_gpu:
-    torch.cuda.set_device(args.gpu_id)
-    device = torch.device(args.gpu_id)
-else:
-    device = torch.device("cpu")
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # load data
 data_loader = data.Corpus("./data/ptb", args.batch_size, args.max_sql)
