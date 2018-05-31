@@ -70,7 +70,7 @@ def evaluate(data_source):
 def train():
     # Set initial hidden and cell states
     states = (torch.zeros(args.nlayers, args.batch_size, args.nhidden),
-              torch.zeros(args.nlayers, args.atch_size, args.nhidden))
+              torch.zeros(args.nlayers, args.batch_size, args.nhidden))
     data, target, end_flag = data_loader.get_batch()
     i = 0
     while not end_flag:
