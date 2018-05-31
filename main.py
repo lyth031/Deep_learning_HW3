@@ -11,12 +11,8 @@ import data
 import model
 
 parser = argparse.ArgumentParser(description='PyTorch RNN Language Model')
-parser.add_argument('--train', type=str, default='./data/ptb/train.txt',
+parser.add_argument('--train', type=str, default='./data/ptb',
                     help='location of the train data corpus')
-parser.add_argument('--valid', type=str, default='./data/ptb/valid.txt',
-                    help='location of the valid data corpus')
-parser.add_argument('--test', type=str, default='./data/ptb/test.txt',
-                    help='location of the test data corpus') 
 parser.add_argument('--is_training', type=bool, default=True,
                     help='train or test')                   
 parser.add_argument('--model', type=str, default='LSTM',
@@ -31,7 +27,7 @@ parser.add_argument('--lr', type=float, default=20,
                     help='initial learning rate')
 parser.add_argument('--clip', type=float, default=0.25,
                     help='gradient clipping')
-parser.add_argument('--epochs', type=int, default=40,
+parser.add_argument('--epochs', type=int, default=20,
                     help='upper epoch limit')
 parser.add_argument('--batch_size', type=int, default=20, metavar='N',
                     help='batch size')
@@ -65,11 +61,7 @@ device = torch.device("cuda" if args.cuda else "cpu")
 # Load data
 ###############################################################################
 
-
-corpus_train = data.Corpus(args.train)
-corpus_valid = data.Corpus(args.valid)
-if not args.is_training:
-    corpus_test = data.Corpus(args.test)
+corpus = data.Corpus(args.data)
 
 # Starting from sequential data, batchify arranges the dataset into columns.
 # For instance, with the alphabet as the sequence and batch size 4, we'd get
@@ -94,16 +86,15 @@ def batchify(data, bsz):
 
 eval_batch_size = 10
 
-train_data = batchify(corpus_train.data, args.batch_size)
-val_data = batchify(corpus_valid.data, eval_batch_size)
-if not args.is_training:
-    test_data = batchify(corpus_test.data, eval_batch_size)
+train_data = batchify(corpus.train, args.batch_size)
+val_data = batchify(corpus.valid, eval_batch_size)
+test_data = batchify(corpus.test, eval_batch_size)
 
 ###############################################################################
 # Build the model
 ###############################################################################
 
-ntokens = len(corpus_train.dictionary)
+ntokens = len(corpus.dictionary)
 model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid, args.nlayers, args.dropout, args.tied).to(device)
 
 criterion = nn.CrossEntropyLoss()
@@ -141,7 +132,7 @@ def evaluate(data_source):
     # Turn on evaluation mode which disables dropout.
     model.eval()
     total_loss = 0.
-    ntokens = len(corpus_train.dictionary)
+    ntokens = len(corpus.dictionary)
     hidden = model.init_hidden(eval_batch_size)
     with torch.no_grad():
         for i in range(0, data_source.size(0) - 1, args.bptt):
@@ -158,7 +149,7 @@ def train():
     model.train()
     total_loss = 0.
     start_time = time.time()
-    ntokens = len(corpus_train.dictionary)
+    ntokens = len(corpus.dictionary)
     hidden = model.init_hidden(args.batch_size)
     for batch, i in enumerate(range(0, train_data.size(0) - 1, args.bptt)):
         data, targets = get_batch(train_data, i)
