@@ -13,7 +13,7 @@ import numpy as np
 from torch.nn.utils import clip_grad_norm
 
 parser = argparse.ArgumentParser(description='PyTorch ptb Language Model')
-parser.add_argument('--epochs', type=int, default=40,
+parser.add_argument('--epochs', type=int, default=10,
                     help='upper epoch limit')
 parser.add_argument('--batch_size', type=int, default=20,
                     help='batch size')
@@ -39,7 +39,7 @@ args = parser.parse_args()
 torch.manual_seed(args.seed)
 
 # Use gpu or cpu to train
-# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # load data
 data_loader = data.Corpus()
@@ -50,7 +50,7 @@ num_batches = ids.size(1) // args.max_sql
 # WRITE CODE HERE witnin two '#' bar
 ########################################
 # Build LMModel model (bulid your language model here)
-model = model.LMModel(nvocab, args.nembed, args.nhidden, args.nlayers)
+model = model.LMModel(nvocab, args.nembed, args.nhidden, args.nlayers).to(device)
 ########################################
 
 criterion = nn.CrossEntropyLoss()
@@ -71,12 +71,12 @@ def evaluate(data_source):
 # Train Function
 def train():
     # Set initial hidden and cell states
-    states = (torch.zeros(args.nlayers, args.batch_size, args.nhidden),
-              torch.zeros(args.nlayers, args.batch_size, args.nhidden))
+    states = (torch.zeros(args.nlayers, args.batch_size, args.nhidden).to(device),
+              torch.zeros(args.nlayers, args.batch_size, args.nhidden).to(device))
     for i in range(0, ids.size(1) - args.max_sql, args.max_sql):
         # Get mini-batch inputs and targets
-        inputs = ids[:, i:i+args.max_sql]
-        targets = ids[:, (i+1):(i+1)+args.max_sql]
+        inputs = ids[:, i:i+args.max_sql].to(device)
+        targets = ids[:, (i+1):(i+1)+args.max_sql].to(device)
         
         # Forward pass
         states = detach(states)
@@ -101,7 +101,7 @@ def detach(states):
     return [state.detach() for state in states] 
 
 # Loop over epochs.
-for epoch in range(1, args.epochs+1):
+for epoch in range(0, args.epochs):
     train()
     # evaluate()
 
