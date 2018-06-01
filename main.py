@@ -13,7 +13,7 @@ import model
 parser = argparse.ArgumentParser(description='PyTorch RNN Language Model')
 parser.add_argument('--data', type=str, default='./data/ptb',
                     help='location of the train data corpus')
-parser.add_argument('--is_training', type=bool, default=True,
+parser.add_argument('--is_training', type=int, default=1,
                     help='train or test')                   
 parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
