@@ -16,7 +16,7 @@ parser.add_argument('--data', type=str, default='./data/ptb',
 parser.add_argument('--is_training', type=int, default=1,
                     help='train or test')                   
 parser.add_argument('--model', type=str, default='LSTM',
-                    help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
+                    help='type of recurrent net (LSTM, GRU)')
 parser.add_argument('--emsize', type=int, default=1500,
                     help='size of word embeddings')
 parser.add_argument('--nhid', type=int, default=1500,
@@ -45,8 +45,6 @@ parser.add_argument('--log-interval', type=int, default=200, metavar='N',
                     help='report interval')
 parser.add_argument('--save', type=str, default='model.pt',
                     help='path to save the final model')
-parser.add_argument('--onnx-export', type=str, default='',
-                    help='path to export the final model in onnx format')
 args = parser.parse_args()
 
 # Set the random seed manually for reproducibility.
@@ -179,20 +177,9 @@ def train():
             start_time = time.time()
 
 
-def export_onnx(path, batch_size, seq_len):
-    print('The model is also exported in ONNX format at {}'.
-          format(os.path.realpath(args.onnx_export)))
-    model.eval()
-    dummy_input = torch.LongTensor(seq_len * batch_size).zero_().view(-1, batch_size).to(device)
-    hidden = model.init_hidden(batch_size)
-    torch.onnx.export(model, (dummy_input, hidden), path)
-
-
 # Loop over epochs.
 lr = args.lr
 best_val_loss = None
-print("Is_training: {:d}" .format(args.is_training))
-print("Seed: {:d}" .format(args.seed))
 
 if args.is_training:
     # At any point you can hit Ctrl + C to break out of training early.
@@ -227,6 +214,7 @@ else:
         # after load the rnn params are not a continuous chunk of memory
         # this makes them a continuous chunk, and will speed up forward pass
         model.rnn.flatten_parameters()
+        print("Model loaded!")
 
     # Run on test data.
     test_loss = evaluate(test_data)
@@ -234,7 +222,3 @@ else:
     print('| Test loss {:5.2f} | test ppl {:8.2f}'.format(
         test_loss, math.exp(test_loss)))
     print('=' * 89)
-
-if len(args.onnx_export) > 0:
-    # Export the model in ONNX format.
-    export_onnx(args.onnx_export, batch_size=1, seq_len=args.bptt)
