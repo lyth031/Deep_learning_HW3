@@ -191,6 +191,7 @@ def export_onnx(path, batch_size, seq_len):
 # Loop over epochs.
 lr = args.lr
 best_val_loss = None
+print("Is_training: {:1d}" .format(args.is_training))
 
 if args.is_training:
     # At any point you can hit Ctrl + C to break out of training early.
@@ -208,6 +209,7 @@ if args.is_training:
             if not best_val_loss or val_loss < best_val_loss:
                 with open(args.save, 'wb') as f:
                     torch.save(model, f)
+                    print("Model saved!")
                 best_val_loss = val_loss
             else:
                 # Anneal the learning rate if no improvement has been seen in the validation dataset.
